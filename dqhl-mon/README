@@ -1,11 +1,19 @@
 # dqhl-mon
 
-The script dqhlPassFailList.py produces an ascii file with the results from the DQHL data-quality checks. Example list below. Run with:
+The script dqhlPassFailList.py produces an ascii file with the results from the DQHL data-quality checks; example list below. 
 
+You will need to add to the current directory a file named 
+    DB_settings.py
+which must include the following line:
+    COUCHDB_SERVER = "http://<snoplususer>:<notarealpassword>@couch.snopl.us"
+with appropriate substitutions for the username and password.
+
+Run with:
 > python ./dqhlPassFailList.py FIRSTRUN-LASTRUN
 
 For hints on how to read the column headings, see https://www.snolab.ca/snoplus/TWiki/bin/view/DataQuality/WebHome, DQHL Run Lists.
 
+Example list:
 
 Run no |   By processor   |    Trigger Processor    |                 Time Processor                 |       Run Processor       |   PMT Processor
 ------------------------------------------------------------------------------------------------------------------------------------------------------
