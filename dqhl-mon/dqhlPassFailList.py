@@ -20,73 +20,91 @@ from downloadCouchDBFiles import getCouchDBDict
 from dqhlProcChecks import *
 
 def initRunlistFile(firstRun, lastRun):
+
     # Open runlist file:
     runlistFileName = "runlist_%s-%s.txt" % (firstRun, lastRun)
     runlistFile = open(runlistFileName, "w")
 
     # Print list header:
     runlistFile.write("\n")
-    runlistFile.write("Run no |   By processor   |" + \
+    runlistFile.write("Run no | Length |   By processor   |" + \
                       "    Trigger Processor    |" + \
                       "             Time Processor              |" + \
-                      "       Run Processor       |   PMT Processor\n")
-    runlistFile.write("---------------------------" + \
+                      "   Run Processor    |   PMT Processor\n")
+    runlistFile.write("------------------------------------" + \
                       "--------------------------" + \
                       "-------------------------------------------" + \
-                      "-----------------------------------------------\n")
-    runlistFile.write("       | TTRP    | TTRP   |" + \
+                      "----------------------------------------\n")
+    runlistFile.write("       |        | TTRP    | TTRP   |" + \
                       " N100L ESUMH Miss BitFlp |" + \
                       " Event GT in  Re-   1st ev 10 MHz  Event |" + \
-                      " Physics Monte Trig | (Run | Ov'all Crate Panel\n")
-    runlistFile.write("       | (modif) | (orig) |"+ \
+                      " Physics Monte Trig | Ov'all Crate Panel\n")
+    runlistFile.write("       |  (s)   | (modif) | (orig) |"+ \
                       " rate  rate  GTID GTID   |" + \
                       " rate  oth ev trigs time   UT comp order |" + \
-                      " run     Carlo mask | len) | covg   covg  covg\n")
-    runlistFile.write("---------------------------" + \
+                      " run     Carlo mask | covg   covg  covg\n")
+    runlistFile.write("------------------------------------" + \
                       "--------------------------" + \
                       "-------------------------------------------" + \
-                      "-----------------------------------------------\n")
+                      "----------------------------------------\n")
 
     return runlistFile
 
 def processRun(runNumber, data, runlistFile):
+
     # Unpack validity range and results:
     run_range = data['run_range']
     checks = data['checks']
+    # print "data: ", data
 
     # Unpack results from the four DQ procs:
     triggerProc = checks['dqtriggerproc']
     timeProc = checks['dqtimeproc']
     runProc = checks['dqrunproc']
     pmtProc = checks['dqpmtproc']
+    runLength = runProc['check_params']['run_length']
+    runPass = ' '
+    if runLength < 1800:
+        runPass = '!'
 
     # Print run results list:
-    runlistFile.write("%s | %i%i%i%i    | %i%i%i%i   |" % \
-           (str(runNumber), \
-           modifTriggerProcChecksOK(triggerProc), \
-           modifTimeProcChecksOK(timeProc), \
-           modifRunProcChecksOK(runProc), pmtProcChecksOK(pmtProc), \
-           nominalTriggerProcChecksOK(triggerProc), timeProcChecksOK(timeProc), \
-           runProcChecksOK(runProc), pmtProcChecksOK(pmtProc)) + \
+    runlistFile.write("%s |  %4.0f%s | %i%i%i%i    | %i%i%i%i   |" % \
+                      (str(runNumber), \
+                      runLength, \
+                      runPass, \
+                      modifTriggerProcChecksOK(runNumber, triggerProc), \
+                      modifTimeProcChecksOK(runNumber, timeProc), \
+                      modifRunProcChecksOK(runNumber, runProc), \
+                      pmtProcChecksOK(pmtProc), \
+                      nominalTriggerProcChecksOK(triggerProc), \
+                      timeProcChecksOK(timeProc), \
+                      runProcChecksOK(runProc), \
+                      pmtProcChecksOK(pmtProc)) + \
                       " %i     %i     %i    %i      |" % \
-           (triggerProc['n100l_trigger_rate'], \
-           triggerProc['esumh_trigger_rate'], \
-           triggerProc['triggerProcMissingGTID'], 
-           triggerProc['triggerProcBitFlipGTID']) + \
+                      (triggerProc['n100l_trigger_rate'], \
+                      triggerProc['esumh_trigger_rate'], \
+                      triggerProc['triggerProcMissingGTID'], 
+                      triggerProc['triggerProcBitFlipGTID']) + \
                       " %i     %i      %i     %i     " % \
-           (timeProc['event_rate'], timeProc['event_separation'], \
-           timeProc['retriggers'], timeProc['run_header']) + \
+                      (timeProc['event_rate'], \
+                      timeProc['event_separation'], \
+                      timeProc['retriggers'], \
+                      timeProc['run_header']) + \
                       " %i       %i     |" % \
-           (timeProc['10Mhz_UT_comparrison'], timeProc['clock_forward']) + \
-                     " %i       %i     %i    |  %i   | %i      %i     %i\n" % \
-           (runProc['run_type'], runProc['mc_flag'], \
-           runProc['trigger'], runProc['run_length'], \
-           pmtProc['general_coverage'], pmtProc['crate_coverage'], \
-           pmtProc['panel_coverage']))
+                      (timeProc['10Mhz_UT_comparrison'], \
+                      timeProc['clock_forward']) + \
+                      " %i       %i     %i    | %i      %i     %i\n" % \
+                      (runProc['run_type'], \
+                      runProc['mc_flag'], \
+                      runProc['trigger'], 
+                      pmtProc['general_coverage'], \
+                      pmtProc['crate_coverage'], \
+                      pmtProc['panel_coverage']))
 
     return
 
 def dqhlPassFailList(firstRun, lastRun):
+
     # Open and initiate run-list file:
     runlistFile = initRunlistFile(firstRun, lastRun)
 
@@ -98,16 +116,16 @@ def dqhlPassFailList(firstRun, lastRun):
     for runNumber in range(firstRun, lastRun+1):
         # if ((i % 10 == 0) and (i != 0)):
         if ((runNumber % 10 == 0) and (nRuns != 0)):
-            runlistFile.write("- - - -|- - - - -|- - - - |" + \
-                              " - - - - - - - - - - - - |" + \
-                              " - - - - - - - - - - - - - "
-                              "- - - - - - - | - - - - - - - - - - - - - |" + \
+            runlistFile.write("- - - -|- - - - | - - - - | - - - -|" + \
+                              "- - - - - - - - - - - - -|" + \
+                              "- - - - - - - - - - - - - -"
+                              " - - - - - - -|- - - - - - - - - - |" + \
                               " - - - - - - - - - \n")
 
         # Download DQ ratdb table:
         data = getCouchDBDict(db, runNumber)
-        # print "data: ", data
         if (data is not None):
+            # print "data: ", data
             if isPhysicsRun(data):
                 print "Processing DQHL record for run number %i" % runNumber
                 processRun(runNumber, data, runlistFile)
@@ -118,10 +136,14 @@ def dqhlPassFailList(firstRun, lastRun):
         else:
             print "No DQHL record found for run number %i" % runNumber
 
+    # Close run-list file:
+    runlistFile.close()
+
     return
 
 
 if __name__=="__main__":
+
     # Parse command line:
     parser = argparse.ArgumentParser()
     parser.add_argument('run_range', help="FIRSTRUN-LASTRUN", type=str)
@@ -150,5 +172,6 @@ if __name__=="__main__":
 
     print "Running dqhlPassFailList for run range %i-%i" % (firstRun, lastRun)
     dqhlPassFailList(firstRun, lastRun)
+
     sys.exit(0)
 

@@ -40,12 +40,12 @@ def dqhlChecksOK(data):
         passChecks = 1
     return passChecks
 
-def modifDqhlChecksOK(data):
+def modifDqhlChecksOK(runNumber, data):
     passChecks = 0
     checks = data['checks']
     if ((modifTriggerProcChecksOK(checks['dqtriggerproc']) == 1) and
         (modifTimeProcChecksOK(checks['dqtimeproc']) == 1) and
-        (modifRunProcChecksOK(checks['dqrunproc']) == 1) and
+        (modifRunProcChecksOK(runNumber, checks['dqrunproc']) == 1) and
         (pmtProcChecksOK(checks['dqpmtproc']) == 1)):
         passChecks = 1
     return passChecks
@@ -71,25 +71,27 @@ def nominalTriggerProcChecksOK(triggerProc):
         passChecks = 1
     return passChecks
 
-# Check for Missing GTIDs removed until PR addressing this has come into operation:
 def triggerProcChecksOK(triggerProc):
     passChecks = 0
     if ((triggerProc['n100l_trigger_rate'] == 1) and
         (triggerProc['esumh_trigger_rate'] == 1) and
-        # (triggerProc['triggerProcMissingGTID'] == 1) and 
+        (triggerProc['triggerProcMissingGTID'] == 1) and 
         (triggerProc['triggerProcBitFlipGTID'] == 1)):
         passChecks = 1
     return passChecks
 
 # Use this version for RS if processing v1 of runs < 100600:
-def modifTriggerProcChecksOK(triggerProc):
+def modifTriggerProcChecksOK(runNumber, triggerProc):
     passChecks = 0
-    if ((triggerProc['n100l_trigger_rate'] == 1) and
-        (triggerProc['esumh_trigger_rate'] == 1) and
-        # (triggerProc['triggerProcMissingGTID'] == 1) and 
-        # (triggerProc['triggerProcBitFlipGTID'] == 1)):
-        (modifBitFlipGTIDCountOK(triggerProc) == 1)):
-        passChecks = 1
+    if (runNumber >= 101266): 
+        passChecks = triggerProcChecksOK(triggerProc)
+    else:
+        if ((triggerProc['n100l_trigger_rate'] == 1) and
+            (triggerProc['esumh_trigger_rate'] == 1) and
+            # (triggerProc['triggerProcMissingGTID'] == 1) and 
+            # (triggerProc['triggerProcBitFlipGTID'] == 1)):
+            (modifBitFlipGTIDCountOK(triggerProc) == 1)):
+            passChecks = 1
     return passChecks
 
 # --- From dqtimeproc: ---
@@ -121,7 +123,7 @@ def timeProcChecksOK(timeProc):
     return passChecks
 
 # Use this version for RS if processing v1 of runs < 100600:
-def modifTimeProcChecksOK(timeProc):
+def modifTimeProcChecksOK(runNumber, timeProc):
     passChecks = 0
     # if ((timeProc['event_rate'] == 1) and 
     if ((modifEventRateCheckOK(timeProc) == 1) and 
@@ -149,14 +151,17 @@ def runProcChecksOK(runProc):
     return passChecks
 
 # Use this version for RS if processing v1 of runs < 100600:
-def modifRunProcChecksOK(runProc):
+def modifRunProcChecksOK(runNumber, runProc):
     passChecks = 0
-    if ((runProc['run_type'] == 1) and
-        # (runProc['mc_flag'] == 1) and
-        # (runProc['run_length'] == 1) and            # Ca 18 May 2017: No longer used
-        # (runProc['trigger'] == 1)):                 # Pre-ca 18 May 2017: Ignore due to bug 
-        (runProc['mc_flag'] == 1)):
-        passChecks = 1
+    if (runNumber >= 100600):
+        passChecks = runProcChecksOK(runProc)
+    else:
+        if ((runProc['run_type'] == 1) and
+            # (runProc['mc_flag'] == 1) and
+            # (runProc['run_length'] == 1) and        # Ca 18 May 2017: No longer used
+            # (runProc['trigger'] == 1)):             # Pre-ca 18 May 2017: Ignore due to bug 
+            (runProc['mc_flag'] == 1)):
+            passChecks = 1
     return passChecks
 
 # --- From dqpmtproc: ---
