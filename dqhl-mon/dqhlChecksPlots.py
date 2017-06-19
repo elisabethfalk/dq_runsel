@@ -18,6 +18,7 @@ import ROOT
 import couchdb
 import DB_settings
 from downloadCouchDBFiles import getCouchDBDict
+from downloadCouchDBFiles import createRATDBFiles
 from dqhlProcChecks import *
 from dqhlChecksHistograms import createHistograms, fillHistograms, \
                                  drawHistograms
@@ -62,23 +63,13 @@ def dqhlChecksPlots(firstRun, lastRun):
 if __name__=="__main__":
     # Parse command line:
     parser = argparse.ArgumentParser()
-    parser.add_argument('run_range', help="FIRSTRUN-LASTRUN", type=str)
+    parser.add_argument('-i', type=int, required=True, help="First run number in your list.")
+    parser.add_argument('-f', type=int, required=True, help="Last run number in your list.")
+    parser.add_argument('--createratdb', dest="createRATDB",help="Save and read from existing ratdb files, instead from memory", action='store_true')
     args = parser.parse_args()
-    runs = args.run_range.split("-")
-    parseOK = False
-    if (len(runs) >= 1):
-        if runs[0].isdigit():
-            firstRun = int(runs[0])
-            if len(runs) == 2:
-                if runs[1].isdigit():
-                    lastRun = int(runs[1])
-                    parseOK = True
-            elif len(runs) == 1:
-                lastRun = firstRun
-                parseOK = True
-    if not parseOK:
-        print parser.print_help()
-        sys.exit(1)
+
+    firstRun = args.i
+    lastRun = args.f
 
     # Check that first run <= last run
     if lastRun < firstRun:
@@ -87,6 +78,13 @@ if __name__=="__main__":
         sys.exit(1)
 
     print "Running dqhlChecksPlots for run range %i-%i" % (firstRun, lastRun)
-    c1 = dqhlChecksPlots(firstRun, lastRun)
+
+    # Check if user wants to save ratdb files
+    if (args.createRATDB):
+        db = couchdb.Server(DB_settings.COUCHDB_SERVER)
+        for runNumber in range(firstRun, lastRun+1):
+            createRATDBFiles(db, runNumber)
+
+    
     sys.exit(0)
 

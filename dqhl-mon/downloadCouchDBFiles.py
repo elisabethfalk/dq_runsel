@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 # From Mark Stringer
 
@@ -16,19 +16,18 @@ def getCouchDBDict(server,runNumber):
             data = dqDB.get(runDocId)
             return data
 
-def createRATDBFiles(db,imagedir):
-    folders = os.listdir(imagedir)
-    for fold in folders:
-        if not "TELLIE_DQ_IMAGES" in fold:
-            continue
-        runNum = int(fold.split("_")[-1])
-        couchDict = getCouchDBDict(db,runNum)
-        outFile = os.path.join(imagedir,fold)
-        outFile = os.path.join(outFile,"DATAQUALITY_RECORDS_%d_p1.ratdb" % runNum)
-        print "Creating File: %s" % outFile
+def createRATDBFiles(db, runNum):
+    if not os.path.exists("./ratdb_files"):
+        os.makedirs("./ratdb_files")
+    outFile = "./ratdb_files/DATAQUALITY_RECORDS_%d.ratdb" % runNum
+    if not os.path.isfile(outFile):
+        couchDict = getCouchDBDict(db, runNum)
+        print "Creating File: %s" %outFile
         with open(outFile,"w") as fil:
-            outString = json.dumps(couchDict,fil,indent=0)
+            outString = json.dumps(couchDict,fil,indent=1)
             fil.write(outString)
+    else:
+        print "File: %s already exists." %outFile
 
 
 if __name__=="__main__":
