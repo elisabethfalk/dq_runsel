@@ -27,7 +27,7 @@ def createRATDBFiles(db, runNum):
         if (couchDict != None):
             print "Creating File: %s" %outFile
             with open(outFile,"w") as fil:
-                outString = json.dumps(couchDict,fil)
+                outString = json.dumps(couchDict,fil,indent=1)
                 fil.write(outString)
         else:
             print "No DQHL table for run %i" %runNum
