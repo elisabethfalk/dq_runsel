@@ -16,7 +16,6 @@ import argparse
 import sys
 import json
 import os
-import ROOT
 from downloadCouchDBFiles import createRATDBFiles
 from dqhlProcChecks import isPhysicsRun
 from dqhlChecksHistograms import createHistograms, fillHistograms, \
@@ -42,17 +41,14 @@ def dqhlChecksPlots(firstRun, lastRun):
                 " (although DQHL record was found)"
 
     # Draw histograms:
-    c1 = drawHistograms(firstRun, lastRun, nRuns, hist)
-
-    return c1
-
+    drawHistograms(firstRun, lastRun, nRuns, hist)
 
 if __name__=="__main__":
     # Parse command line:
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', type=int, required=True, help="First run number in your list.")
     parser.add_argument('-f', type=int, required=True, help="Last run number in your list.")
-    parser.add_argument('--createratdb', dest="createRATDB",help="Save and read from existing ratdb files, instead from memory", action='store_true')
+    parser.add_argument('--createratdb', dest="createRATDB",help="Save and read from existing ratdb files, instead from memory.", action='store_true')
     args = parser.parse_args()
 
     firstRun = args.i
@@ -68,10 +64,9 @@ if __name__=="__main__":
 
     # Check if user wants to save ratdb files
     if (args.createRATDB):
-        for runNumber in range(firstRun, lastRun+1):
-            createRATDBFiles(runNumber)
+        createRATDBFiles(firstRun, lastRun)
 
-    c1 = dqhlChecksPlots(firstRun, lastRun)
+    dqhlChecksPlots(firstRun, lastRun)
     
     sys.exit(0)
 
