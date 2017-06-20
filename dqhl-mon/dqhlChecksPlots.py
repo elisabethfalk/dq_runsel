@@ -17,7 +17,7 @@ import sys
 import ROOT
 import couchdb
 import DB_settings
-from downloadCouchDBFiles import getCouchDBDict
+import json
 from downloadCouchDBFiles import createRATDBFiles
 from dqhlProcChecks import *
 from dqhlChecksHistograms import createHistograms, fillHistograms, \
@@ -36,23 +36,20 @@ def dqhlChecksPlots(firstRun, lastRun):
 
     # Open database(s):                                                         
     db = couchdb.Server(DB_settings.COUCHDB_SERVER)
-
-    # Loop over run range to extract stats and fill list(s)/histogram(s):
     nRuns = 0
-    for runNumber in range(firstRun, lastRun+1):
-        # Download DQ ratdb table:
-        data = getCouchDBDict(db, runNumber)
-        # print "data: ", data
-        if (data is not None):
-            if isPhysicsRun(data):
-                print "Processing DQHL record for run number %i" % runNumber
-                processRun(runNumber, data, hist)
-                nRuns += 1
-            else:
-                print "Run number %i is not a PHYSICS run" % runNumber + \
-                      " (although DQHL record was found)"
+    # Loop over all the saved ratdb files to produce the DQHL histograms
+    for runNum in range(firstRun, lastRun+1):
+        fileName = "./ratdb_files/DATAQUALITY_RECORDS_%d.ratdb"%runNum
+        json_data = open(fileName).read()
+        data = json.loads(json_data)
+        
+        if isPhysicsRun(data):
+            print "Processing DQHL record for run number %i" % runNum
+            nRuns += 1
+            #processRun(runNumber, data, hist)
         else:
-            print "No DQHL record found for run number %i" % runNumber
+            print "Run number %i is not a PHYSICS run" % runNum + \
+                " (although DQHL record was found)"
 
     # Draw histograms:
     c1 = drawHistograms(firstRun, lastRun, nRuns, hist)
@@ -85,6 +82,7 @@ if __name__=="__main__":
         for runNumber in range(firstRun, lastRun+1):
             createRATDBFiles(db, runNumber)
 
+    c1 = dqhlChecksPlots(firstRun, lastRun)
     
     sys.exit(0)
 

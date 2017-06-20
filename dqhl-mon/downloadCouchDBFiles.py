@@ -7,7 +7,7 @@ import json
 import os
 import DB_settings
 
-def getCouchDBDict(server,runNumber):
+def getDQtable(server,runNumber):
     dqDB = server["data-quality"]
     data = None
     for row in dqDB.view('_design/data-quality/_view/runs'):
@@ -20,12 +20,17 @@ def createRATDBFiles(db, runNum):
     if not os.path.exists("./ratdb_files"):
         os.makedirs("./ratdb_files")
     outFile = "./ratdb_files/DATAQUALITY_RECORDS_%d.ratdb" % runNum
+
+    # Donwload table if the user doesn't have it
     if not os.path.isfile(outFile):
-        couchDict = getCouchDBDict(db, runNum)
-        print "Creating File: %s" %outFile
-        with open(outFile,"w") as fil:
-            outString = json.dumps(couchDict,fil,indent=1)
-            fil.write(outString)
+        couchDict = getDQtable(db, runNum)
+        if (couchDict != None):
+            print "Creating File: %s" %outFile
+            with open(outFile,"w") as fil:
+                outString = json.dumps(couchDict,fil)
+                fil.write(outString)
+        else:
+            print "No DQHL table for run %i" %runNum
     else:
         print "File: %s already exists." %outFile
 
