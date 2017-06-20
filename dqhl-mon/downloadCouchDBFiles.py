@@ -33,10 +33,3 @@ def createRATDBFiles(db, runNum):
             print "No DQHL table for run %i" %runNum
     else:
         print "File: %s already exists." %outFile
-
-
-if __name__=="__main__":
-    db = couchdb.Server(DB_settings.COUCHDB_SERVER)
-    # createRATDBFiles(db,"/home/mark/Documents/PHD/DQTests/TELLIEDQTest/28March2017Runs")
-    createRATDBFiles(db,".")
-

@@ -27,8 +27,6 @@ def processRun(runNumber, data, hist):
     # Fill histograms:
     fillHistograms(runNumber, data, hist)
 
-    return
-
 def dqhlChecksPlots(firstRun, lastRun):
 
     # Create Histograms:
@@ -46,7 +44,7 @@ def dqhlChecksPlots(firstRun, lastRun):
         if isPhysicsRun(data):
             print "Processing DQHL record for run number %i" % runNum
             nRuns += 1
-            #processRun(runNumber, data, hist)
+            processRun(runNumber, data, hist)
         else:
             print "Run number %i is not a PHYSICS run" % runNum + \
                 " (although DQHL record was found)"
