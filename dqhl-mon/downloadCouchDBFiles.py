@@ -16,7 +16,8 @@ def getDQtable(server,runNumber):
             data = dqDB.get(runDocId)
             return data
 
-def createRATDBFiles(db, runNum):
+def createRATDBFiles(runNum):
+    db = couchdb.Server(DB_settings.COUCHDB_SERVER)
     if not os.path.exists("./ratdb_files"):
         os.makedirs("./ratdb_files")
     outFile = "./ratdb_files/DATAQUALITY_RECORDS_%d.ratdb" % runNum

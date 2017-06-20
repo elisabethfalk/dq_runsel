@@ -14,39 +14,31 @@
 
 import argparse
 import sys
-import ROOT
-import couchdb
-import DB_settings
 import json
 import os
+import ROOT
 from downloadCouchDBFiles import createRATDBFiles
 from dqhlProcChecks import isPhysicsRun
 from dqhlChecksHistograms import createHistograms, fillHistograms, \
                                  drawHistograms
 
-def processRun(runNumber, data, hist):
-    # Fill histograms:
-    fillHistograms(runNumber, data, hist)
-
 def dqhlChecksPlots(firstRun, lastRun):
 
-    # Create Histograms:
+    # Create Dictionary hist of keys(hist name) and values(hist itself):
     hist = createHistograms(firstRun, lastRun)
 
-    # Open database(s):                                                         
-    db = couchdb.Server(DB_settings.COUCHDB_SERVER)
     nRuns = 0
     # Loop over all the saved ratdb files to produce the DQHL histograms
     for fileName in os.listdir("./ratdb_files"):
         json_data = open("./ratdb_files/"+fileName).read()
         data = json.loads(json_data)
-        runNum = fileName[20:-5]
+        runNum = int(fileName[20:-6])
         if isPhysicsRun(data):
-            print "Processing DQHL record for run number %s" % runNum
+            print "Processing DQHL record for run number %i" % runNum
             nRuns += 1
-            processRun(runNumber, data, hist)
+            fillHistograms(runNum, data, hist)
         else:
-            print "Run number %s is not a PHYSICS run" % runNum + \
+            print "Run number %i is not a PHYSICS run" % runNum + \
                 " (although DQHL record was found)"
 
     # Draw histograms:
@@ -76,9 +68,8 @@ if __name__=="__main__":
 
     # Check if user wants to save ratdb files
     if (args.createRATDB):
-        db = couchdb.Server(DB_settings.COUCHDB_SERVER)
         for runNumber in range(firstRun, lastRun+1):
-            createRATDBFiles(db, runNumber)
+            createRATDBFiles(runNumber)
 
     c1 = dqhlChecksPlots(firstRun, lastRun)
     
