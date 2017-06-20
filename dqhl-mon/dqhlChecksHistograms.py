@@ -347,13 +347,18 @@ def drawHistograms(firstRun, lastRun, nRuns, hist):
     hist['hAvgEvRate'].Draw("P")
     c1.Print(("DQHL_avg_event_rate_%i-%i.png" % (firstRun, lastRun)))
 
+    ROOT.gPad.SetLogy(0)
+    hist['hDelTEvRate'].Draw("P")
+    hist['hDelTEvRate'].SetMaximum(3000.)
+    c1.Print(("DQHL_avg_event_rate_lin_%i-%i.png" % (firstRun, lastRun)))
+
     ROOT.gPad.SetLogy()
     hist['hDelTEvRate'].Draw("P")
     c1.Print(("DQHL_delta_t_event_rate_%i-%i.png" % (firstRun, lastRun)))
 
     ROOT.gPad.SetLogy(0)
     hist['hDelTEvRate'].Draw("P")
-    hist['hDelTEvRate'].SetMaximum(2000.)
+    hist['hDelTEvRate'].SetMaximum(3000.)
     c1.Print(("DQHL_delta_t_event_rate_lin_%i-%i.png" % (firstRun, lastRun)))
 
     ROOT.gPad.SetLogy()
@@ -374,7 +379,6 @@ def drawHistograms(firstRun, lastRun, nRuns, hist):
     ROOT.gPad.SetLogy(0)
     hist['hGeneralCov'].Draw("P")
     c1.Print(("DQHL_general_coverage_%i-%i.png" % (firstRun, lastRun)))
-    # Should have a line on it, where the numerical value comes from general_cov_thresh' ... genCovLine = TLine(firstRun-0.5, 70, lastRun+0.5, 70)
     hist['hCrateCov'].Draw("P")
     c1.Print(("DQHL_crate_coverage_%i-%i.png" % (firstRun, lastRun)))
     hist['hPanelCov'].Draw("P")

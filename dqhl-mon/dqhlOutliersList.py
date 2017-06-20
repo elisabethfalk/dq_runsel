@@ -20,11 +20,17 @@ from downloadCouchDBFiles import getCouchDBDict
 from dqhlProcChecks import *
 
 # Outlier thresholds:
-esumhTriggerRateThreshold = 20
+# esumhTriggerRateThreshold = 20
+esumhTriggerRateThreshold = 30
 n100lTriggerRateThreshold = 100
-orphansCountThreshold = 100
-meanNhitThreshold = 10
+# orphansCountThreshold = 100
+orphansCountThreshold = 1000
+# meanNhitThreshold = 10
+meanNhitThreshold = 20
 bitFlipThreshold = 0
+
+minEventRate = 300
+maxEventRate = 2000
 
 def isOutlierNhit(runProc):
     outlier = False
@@ -60,6 +66,13 @@ def isOutlierBitFlipCount(triggerProc):
         outlier = True
     return outlier
 
+def isOutlierMeanEventRate(timeProc):
+    outlier = False
+    if ((timeProc['check_params']['mean_event_rate'] < minEventRate) or \
+        (timeProc['check_params']['mean_event_rate'] > maxEventRate)):
+        outlier = True
+    return outlier
+
 def initOutliersListFile(firstRun, lastRun):
 
     # Open outliers list file:
@@ -70,16 +83,19 @@ def initOutliersListFile(firstRun, lastRun):
     outliersListFile.write("\n")
     outliersListFile.write("Run no | Length | DQHL P/F |                              Outlier\n")
     outliersListFile.write("-------------------------------------------------------" + \
-                           "-----------------------------------------\n")
+                           "--------------------------------------------------------\n")
     outliersListFile.write("       |        |   TTRP   | Mean nhit | ESUMH rate | N100L rate |" + \
-                           " Orphan count | BitFlip count\n")
+                           " Orphan count | BitFlip count | Mean ev rate\n")
     outliersListFile.write("       |  (s)   |  (modif) |   > %2i    |    > %2i    |   > %3i    |" % \
                            (meanNhitThreshold, esumhTriggerRateThreshold, \
                             n100lTriggerRateThreshold) + \
-                           "    > %3i     |      > %1i\n" % \
-                            (orphansCountThreshold, bitFlipThreshold))
+                           "    > %4i    |      > %1i      |   < %3i or \n" % \
+                           (orphansCountThreshold, bitFlipThreshold, minEventRate))
+    outliersListFile.write("       |        |          |           |            |            |" + \
+                           "              |               |    > %4i\n" % \
+                           (maxEventRate))
     outliersListFile.write("-------------------------------------------------------" + \
-                           "-----------------------------------------\n")
+                           "--------------------------------------------------------\n")
 
     return outliersListFile
 
@@ -133,8 +149,13 @@ def processRun(runNumber, data, outliersListFile):
         else:
             outliersListFile.write("             | ")
         if isOutlierBitFlipCount(triggerProc):
-            outliersListFile.write("%13i" % \
+            outliersListFile.write("%13i | " % \
             len(triggerProc['check_params']['bitflip_gtids']))
+        else: 
+            outliersListFile.write("              | ")
+        if isOutlierMeanEventRate(timeProc):
+            outliersListFile.write("%12i" % \
+            timeProc['check_params']['mean_event_rate'])
         else: 
             outliersListFile.write("             ")
         outliersListFile.write("\n")
@@ -156,7 +177,7 @@ def dqhlOutliersList(firstRun, lastRun):
         if ((runNumber % 100 == 0) and (nRuns != 0)):
             outliersListFile.write("- - - -|- - - - | - - - - -|- - - - - -|" + \
                                    "- - - - - - | - - - - - -|" + \
-                                   "- - - - - - - | - - - - - - - \n")
+                                   "- - - - - - - | - - - - - - - | - - - - - - -\n")
 
         # Download DQ ratdb table:
         data = getCouchDBDict(db, runNumber)
