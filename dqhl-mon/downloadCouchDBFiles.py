@@ -29,11 +29,15 @@ def createRATDBFiles(firstRun, lastRun):
         # Donwload table if the user doesn't have it and is a physics run
         if not os.path.isfile(outFile):
             couchDict = getDQtable(db, runNum)
-            if (couchDict != None and isPhysicsRun(couchDict)):
-                print "Creating File: %s" %outFile
-                with open(outFile,"w") as fil:
-                    outString = json.dumps(couchDict,fil,indent=1)
-                    fil.write(outString)
+            if (couchDict != None):
+                if isPhysicsRun(couchDict):
+                    print "Creating File: %s" %outFile
+                    with open(outFile,"w") as fil:
+                        outString = json.dumps(couchDict,fil,indent=1)
+                        fil.write(outString)
+                else:
+                    print "Run number %i is not a PHYSICS run" % runNum + \
+                        " (although DQHL record was found)"
             else:
                 print "No DQHL table for run %i" %runNum
         else:

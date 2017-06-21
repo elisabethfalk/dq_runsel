@@ -32,6 +32,7 @@ def dqhlChecksPlots(firstRun, lastRun):
 
     nRuns = 0
     # Loop over all the saved ratdb files to produce the DQHL histograms
+    # FIXME---->>> Change to loop only over files with the right run range!!
     for fileName in os.listdir("./ratdb_files"):
         json_data = open("./ratdb_files/"+fileName).read()
         data = json.loads(json_data)
