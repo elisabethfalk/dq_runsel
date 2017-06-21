@@ -16,7 +16,6 @@ import argparse
 import sys
 import json
 import os
-import glob
 from downloadCouchDBFiles import createRATDBFiles
 from dqhlProcChecks import *
 from dqhlChecksHistograms import createHistograms, fillHistograms, \
