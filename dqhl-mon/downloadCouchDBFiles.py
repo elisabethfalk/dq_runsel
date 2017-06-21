@@ -23,13 +23,13 @@ def createRATDBFiles(firstRun, lastRun):
     if not os.path.exists("./ratdb_files"):
         os.makedirs("./ratdb_files")
 
-    for runNum in range(firstRun, lastRun):
+    for runNum in range(firstRun, lastRun+1):
         outFile = "./ratdb_files/DATAQUALITY_RECORDS_%i.ratdb" % runNum
 
         # Donwload table if the user doesn't have it and is a physics run
         if not os.path.isfile(outFile):
             couchDict = getDQtable(db, runNum)
-            if (couchDict != None and isPhysicsRun(data)):
+            if (couchDict != None and isPhysicsRun(couchDict)):
                 print "Creating File: %s" %outFile
                 with open(outFile,"w") as fil:
                     outString = json.dumps(couchDict,fil,indent=1)
