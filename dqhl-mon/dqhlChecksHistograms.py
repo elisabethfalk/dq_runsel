@@ -369,18 +369,20 @@ def drawHistograms(firstRun, lastRun, nRuns, hist):
     hist['hDelTEvRate'].SetMaximum(2000.)
     c1.Print(("DQHL_delta_t_event_rate_lin_%i-%i.png" % (firstRun, lastRun)))
 
-    ROOT.gPad.SetLogy(0)
+    ROOT.gPad.SetLogy()
     hist['hAgreeEvRate'].Draw("P")
     c1.Print(("DQHL_agreement_event_rate_%i-%i.png" % (firstRun, lastRun)))
     
     ROOT.gPad.SetLogy()
+    legend = ROOT.TLegend(0.85, 0.85, 1, 1)
+    legend.AddEntry(hist['hAvgEvRate'], "Average event rate")
+    legend.AddEntry(hist['hDelTEvRate'], "Deta_t event rate")
     hist['hAvgEvRate'].SetTitle(("DQHL Event rate for Physics runs %i-%i" % (firstRun, lastRun)))
     hist['hAvgEvRate'].GetYaxis().SetTitle("Event rate (Hz)")
     hist['hAvgEvRate'].Draw("P")
     hist['hDelTEvRate'].Draw("P same")
+    legend.Draw()
     c1.Print(("DQHL_event_rate_avg_and_delta_t_%i-%i.png" % (firstRun, lastRun)))
-    hist['hAvgEvRate'].SetTitle(("DQHL Event rate (average) for Physics runs %i-%i" % (firstRun, lastRun)))
-    hist['hAvgEvRate'].GetYaxis().SetTitle("Event rate, average (Hz)")
 
     # From Run Processor: 
     ROOT.gPad.SetLogy(0)
