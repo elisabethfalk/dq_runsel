@@ -16,6 +16,7 @@ import argparse
 import sys
 import json
 import os
+import glob
 from downloadCouchDBFiles import createRATDBFiles
 from dqhlProcChecks import *
 from dqhlChecksHistograms import createHistograms, fillHistograms, \
@@ -32,19 +33,21 @@ def dqhlChecksPlots(firstRun, lastRun):
 
     nRuns = 0
     # Loop over all the saved ratdb files to produce the DQHL histograms
-    # FIXME---->>> Change to loop only over files with the right run range!!
-    for fileName in os.listdir("./ratdb_files"):
-        json_data = open("./ratdb_files/"+fileName).read()
-        data = json.loads(json_data)
-        runNum = int(fileName[20:-6])
-        if isPhysicsRun(data):
-            print "Processing DQHL record for run number %i" % runNum
-            processRun(runNum, data, hist)
-            nRuns += 1
-        else:
-            print "Run number %i is not a PHYSICS run" % runNum + \
-                " (although DQHL record was found)"
-
+    for runNum in range(firstRun, lastRun+1):
+        fileName = "./ratdb_files/DATAQUALITY_RECORDS_%i.ratdb" % runNum
+        try:
+            json_data = open(fileName).read()
+            data = json.loads(json_data)
+            if isPhysicsRun(data):
+                print "Processing DQHL record for run number %i" % runNum
+                processRun(runNum, data, hist)
+                nRuns += 1
+            else:
+                print "Run number %i is not a PHYSICS run" % runNum + \
+                    " (although DQHL record was found)"
+        except IOError:
+            print "No RATDB file for run %i " %runNum
+            continue
     # Draw histograms:
     drawHistograms(firstRun, lastRun, nRuns, hist)
 
