@@ -6,6 +6,7 @@ import couchdb
 import json
 import os
 import DB_settings
+from dqhlProcChecks import isPhysicsRun
 
 def getDQtable(server,runNumber):
     dqDB = server["data-quality"]
@@ -25,10 +26,10 @@ def createRATDBFiles(firstRun, lastRun):
     for runNum in range(firstRun, lastRun):
         outFile = "./ratdb_files/DATAQUALITY_RECORDS_%i.ratdb" % runNum
 
-        # Donwload table if the user doesn't have it
+        # Donwload table if the user doesn't have it and is a physics run
         if not os.path.isfile(outFile):
             couchDict = getDQtable(db, runNum)
-            if (couchDict != None):
+            if (couchDict != None and isPhysicsRun(data)):
                 print "Creating File: %s" %outFile
                 with open(outFile,"w") as fil:
                     outString = json.dumps(couchDict,fil,indent=1)
