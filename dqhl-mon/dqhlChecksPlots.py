@@ -24,7 +24,7 @@ from dqhlChecksHistograms import createHistograms, fillHistograms, \
 def processRun(runNumber, data, hist):
     # Fill histograms
     fillHistograms(runNumber, data, hist)
-    
+
 def dqhlChecksPlots(firstRun, lastRun):
 
     # Create Dictionary hist of keys(hist name) and values(hist itself):
@@ -48,38 +48,42 @@ def dqhlChecksPlots(firstRun, lastRun):
     drawHistograms(firstRun, lastRun, nRuns, hist)
 
 if __name__=="__main__":
-	# Parse command line:
-	parser = argparse.ArgumentParser()
-	parser.add_argument('run_range', help="FIRSTRUN-LASTRUN", type=str)
-	parser.add_argument('--createratdb', dest="createRATDB",help="Save and read from existing ratdb files, instead from memory.", action='store_true')
-	args = parser.parse_args()
-	runs = args.run_range.split("-")
-	parseOK = False
-	if (len(runs) >= 1):
-		if runs[0].isdigit():
-			firstRun = int(runs[0])
-			if len(runs) == 2:
-				if runs[1].isdigit():
-					lastRun = int(runs[1])
-					parseOK = True
-				elif len(runs) == 1:
-					lastRun = firstRun
-					parseOK = True
-	if not parseOK:
-		print parser.print_help()
-		sys.exit(1)
-	# Check that first run <= last run
-	if lastRun < firstRun:
-		print "Invalid run range: first run must precede or be equal to, last run"
-		sys.exit(1)
+    # Parse command line:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('run_range', help="FIRSTRUN-LASTRUN", type=str)
+    parser.add_argument('--createratdb', dest="createRATDB",help="Save and read from existing ratdb files, instead from memory.", action='store_true')
+    args = parser.parse_args()
+
     
-	print "Running dqhlChecksPlots for run range %i-%i" % (firstRun, lastRun)
+    runs = args.run_range.split("-")
+    parseOK = False
+    if (len(runs) >= 1):
+        if runs[0].isdigit():
+            firstRun = int(runs[0])
+            if len(runs) == 2:
+                if runs[1].isdigit():
+                    lastRun = int(runs[1])
+                    parseOK = True
+                elif len(runs) == 1:
+                    lastRun = firstRun
+                    parseOK = True
+    if not parseOK:
+        print parser.print_help()
+        sys.exit(1)
 
-	# Check if user wants to save ratdb files
-	if (args.createRATDB):
-		createRATDBFiles(firstRun, lastRun)
+        
+    # Check that first run <= last run
+    if lastRun < firstRun:
+        print "Invalid run range: first run must precede or be equal to, last run"
+        sys.exit(1)
 
-	dqhlChecksPlots(firstRun, lastRun)
+    print "Running dqhlChecksPlots for run range %i-%i" % (firstRun, lastRun)
 
-	sys.exit(0)
+    # Check if user wants to save ratdb files
+    if (args.createRATDB):
+        createRATDBFiles(firstRun, lastRun)
+
+    dqhlChecksPlots(firstRun, lastRun)
+
+    sys.exit(0)
 
