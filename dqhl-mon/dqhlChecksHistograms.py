@@ -181,6 +181,17 @@ def createPanelCoverageHistogram(firstRun, lastRun):
 
     return hCrateCov
 
+def createEventRateAgreementHistogram(firstRun, lastRun):
+    histTitle = "DQHL Event rate agreements for Physics runs %i-%i" % (firstRun, lastRun)
+    nBins = lastRun - firstRun + 1
+    hAgreeEvRate = ROOT.TH1D("hDQHLAgreeEvRate", histTitle, nBins, firstRun-0.5, lastRun+0.5)
+    hAgreeEvRate.GetYaxis().SetTitle("Event rate agreement (Hz)")
+    hAgreeEvRate.GetXaxis().SetTitle("Run number")
+    hAgreeEvRate.SetMarkerStyle(7) # 8 = kFullDotLarge
+    hAgreeEvRate.SetMarkerColor(2)
+
+    return hAgreeEvRate
+
 #-- Create all histograms and store in a list/dict ----------------
 
 def createHistograms(firstRun, lastRun):
@@ -207,6 +218,7 @@ def createHistograms(firstRun, lastRun):
     # criteria: retriggers_thresh (10), run_header_thresh (1000000000), min_event_rate (5), max_event_rate (1000), clock_forward_thresh (99), event_separation_thresh (1)
     hist['hAvgEvRate'] = createAverageEventRateHistogram(firstRun, lastRun)
     hist['hDelTEvRate'] = createDeltaTEventRateHistogram(firstRun, lastRun)
+    hist['hAgreeEvRate'] = createEventRateAgreementHistogram(firstRun, lastRun)
     # Lots to do here...
 
     # From RunProc:
@@ -275,14 +287,14 @@ def fillHistograms(runNumber, data, hist):
         hStats.Fill(dqhlChecks.index('10Mhz_UT_comparison'))
     if (timeProc['clock_forward']):
         hStats.Fill(dqhlChecks.index('clock_forward'))
-    # if (timeProc['delta_t_comparison']):     # No longer used
-    #     hStats.Fill(dqhlChecks.index('delta_t_comparison'))
+        # if (timeProc['delta_t_comparison']):     # No longer used
+        #     hStats.Fill(dqhlChecks.index('delta_t_comparison'))
     if (runProc['run_type']):
         hStats.Fill(dqhlChecks.index('run_type'))
     if (runProc['mc_flag']):
         hStats.Fill(dqhlChecks.index('mc_flag'))
-    # if (runProc['run_length']):              # No longer used
-    #     hStats.Fill(dqhlChecks.index('run_length'))
+        # if (runProc['run_length']):              # No longer used
+        #     hStats.Fill(dqhlChecks.index('run_length'))
     if (runProc['trigger']): 
         hStats.Fill(dqhlChecks.index('trigger'))
     if (pmtProc['general_coverage']):
@@ -301,6 +313,7 @@ def fillHistograms(runNumber, data, hist):
     # Fill Time Processor histograms: 
     hist['hAvgEvRate'].Fill(runNumber, timeProc['check_params']['mean_event_rate'])
     hist['hDelTEvRate'].Fill(runNumber, timeProc['check_params']['delta_t_event_rate'])
+    hist['hAgreeEvRate'].Fill(runNumber, timeProc['check_params']['event_rate_agreement'])
 
     # Fill Run Processor histograms: 
     hist['hMeanNhits'].Fill(runNumber, runProc['check_params']['mean_nhit'])
@@ -362,13 +375,24 @@ def drawHistograms(firstRun, lastRun, nRuns, hist):
     c1.Print(("DQHL_delta_t_event_rate_lin_%i-%i.png" % (firstRun, lastRun)))
 
     ROOT.gPad.SetLogy()
+    hist['hAgreeEvRate'].Draw("P")
+    c1.Print(("DQHL_agreement_event_rate_%i-%i.png" % (firstRun, lastRun)))
+
+    ROOT.gPad.SetLogy(0)
+    hist['hAgreeEvRate'].SetAxisRange(0, 100, "y")
+    hist['hAgreeEvRate'].Draw("P")
+    c1.Print(("DQHL_agreement_event_rate_lin_%i-%i.png" % (firstRun, lastRun)))
+
+    ROOT.gPad.SetLogy()
+    legend = ROOT.TLegend(0.85, 0.85, 1, 1)
+    legend.AddEntry(hist['hAvgEvRate'], "Average event rate")
+    legend.AddEntry(hist['hDelTEvRate'], "Deta_t event rate")
     hist['hAvgEvRate'].SetTitle(("DQHL Event rate for Physics runs %i-%i" % (firstRun, lastRun)))
     hist['hAvgEvRate'].GetYaxis().SetTitle("Event rate (Hz)")
     hist['hAvgEvRate'].Draw("P")
     hist['hDelTEvRate'].Draw("P same")
+    legend.Draw()
     c1.Print(("DQHL_event_rate_avg_and_delta_t_%i-%i.png" % (firstRun, lastRun)))
-    hist['hAvgEvRate'].SetTitle(("DQHL Event rate (average) for Physics runs %i-%i" % (firstRun, lastRun)))
-    hist['hAvgEvRate'].GetYaxis().SetTitle("Event rate, average (Hz)")
 
     # From Run Processor: 
     ROOT.gPad.SetLogy(0)
@@ -384,4 +408,4 @@ def drawHistograms(firstRun, lastRun, nRuns, hist):
     hist['hPanelCov'].Draw("P")
     c1.Print(("DQHL_panel_coverage_%i-%i.png" % (firstRun, lastRun)))
 
-    return c1
+    return
