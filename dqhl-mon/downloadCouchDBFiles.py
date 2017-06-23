@@ -17,15 +17,18 @@ def getDQtable(server,runNumber):
             data = dqDB.get(runDocId)
             return data
 
-def createRATDBFiles(firstRun, lastRun):
+def createRATDBFiles(firstRun, lastRun, dataDir):
     # Connect to couchdb
     db = couchdb.Server(DB_settings.COUCHDB_SERVER)
-    if not os.path.exists("./ratdb_files"):
-        os.makedirs("./ratdb_files")
+    if not os.path.isdir(dataDir):
+        try:
+            os.makedirs(dataDir)
+        except OSError:
+            print "Could not create directory %s, invalid path. Terminating code.\n" %s
 
+            
     for runNum in range(firstRun, lastRun+1):
-        outFile = "./ratdb_files/DATAQUALITY_RECORDS_%i.ratdb" % runNum
-
+        outFile = os.path.join(dataDir, "DATAQUALITY_RECORDS_%i.ratdb" % runNum)
         # Donwload table if the user doesn't have it and is a physics run
         if not os.path.isfile(outFile):
             couchDict = getDQtable(db, runNum)

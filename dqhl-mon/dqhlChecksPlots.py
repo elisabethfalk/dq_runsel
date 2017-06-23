@@ -25,7 +25,7 @@ def processRun(runNumber, data, hist):
     # Fill histograms
     fillHistograms(runNumber, data, hist)
 
-def dqhlChecksPlots(firstRun, lastRun):
+def dqhlChecksPlots(firstRun, lastRun, dataDir):
 
     # Create Dictionary hist of keys(hist name) and values(hist itself):
     hist = createHistograms(firstRun, lastRun)
@@ -33,7 +33,7 @@ def dqhlChecksPlots(firstRun, lastRun):
     nRuns = 0
     # Loop over all the saved ratdb files to produce the DQHL histograms
     for runNum in range(firstRun, lastRun+1):
-        fileName = "./ratdb_files/DATAQUALITY_RECORDS_%i.ratdb" % runNum
+        fileName = os.path.join(dataDir, "DATAQUALITY_RECORDS_%i.ratdb" % runNum)
         try:
             json_data = open(fileName).read()
             data = json.loads(json_data)
@@ -55,8 +55,9 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('run_range', help="FIRSTRUN-LASTRUN", type=str)
     parser.add_argument('--createratdb', dest="createRATDB",help="Save and read from existing ratdb files, instead from memory.", action='store_true')
+    parser.add_argument('-d', '--dir', dest="dataDir", help="Directory (including path) of ratdb files.", type=str, required=True)
     args = parser.parse_args()
-
+    
     
     runs = args.run_range.split("-")
     parseOK = False
@@ -84,9 +85,9 @@ if __name__=="__main__":
 
     # Check if user wants to save ratdb files
     if (args.createRATDB):
-        createRATDBFiles(firstRun, lastRun)
+        createRATDBFiles(firstRun, lastRun, args.dataDir)
 
-    dqhlChecksPlots(firstRun, lastRun)
+    dqhlChecksPlots(firstRun, lastRun, args.dataDir)
 
     sys.exit(0)
 
