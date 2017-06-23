@@ -17,7 +17,7 @@ def getDQtable(server,runNumber):
             data = dqDB.get(runDocId)
             return data
 
-def createRATDBFiles(firstRun, lastRun, dataDir):
+def downloadRATDBtables(firstRun, lastRun, dataDir):
     # Connect to couchdb
     db = couchdb.Server(DB_settings.COUCHDB_SERVER)
     if not os.path.isdir(dataDir):
@@ -45,3 +45,5 @@ def createRATDBFiles(firstRun, lastRun, dataDir):
                 print "No DQHL table for run %i" %runNum
         else:
             print "File: %s already exists." %outFile
+
+    return

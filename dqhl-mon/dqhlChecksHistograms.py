@@ -403,3 +403,5 @@ def drawHistograms(firstRun, lastRun, nRuns, hist):
     c1.Print(("DQHL_crate_coverage_%i-%i.png" % (firstRun, lastRun)))
     hist['hPanelCov'].Draw("P")
     c1.Print(("DQHL_panel_coverage_%i-%i.png" % (firstRun, lastRun)))
+
+    return

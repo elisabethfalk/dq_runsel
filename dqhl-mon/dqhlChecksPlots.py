@@ -16,7 +16,7 @@ import argparse
 import sys
 import json
 import os
-from downloadCouchDBFiles import createRATDBFiles
+from downloadCouchDBFiles import downloadRATDBtables
 from dqhlProcChecks import *
 from dqhlChecksHistograms import createHistograms, fillHistograms, \
                                  drawHistograms
@@ -25,8 +25,13 @@ def processRun(runNumber, data, hist):
     # Fill histograms
     fillHistograms(runNumber, data, hist)
 
-def dqhlChecksPlots(firstRun, lastRun, dataDir):
+    return
 
+def dqhlChecksPlots(firstRun, lastRun, dataDir, downloadRATDB):
+    # If true download missing ratdb DQHL tables
+    if ( downloadRATDB ):
+        downloadRATDBtables(firstRun, lastRun, dataDir)
+        
     # Create Dictionary hist of keys(hist name) and values(hist itself):
     hist = createHistograms(firstRun, lastRun)
 
@@ -50,11 +55,13 @@ def dqhlChecksPlots(firstRun, lastRun, dataDir):
     # Draw histograms:
     drawHistograms(firstRun, lastRun, nRuns, hist)
 
+    return
+
 if __name__=="__main__":
     # Parse command line:
     parser = argparse.ArgumentParser()
     parser.add_argument('run_range', help="FIRSTRUN-LASTRUN", type=str)
-    parser.add_argument('--createratdb', dest="createRATDB",help="Save and read from existing ratdb files, instead from memory.", action='store_true')
+    parser.add_argument('--download', dest="downloadRATDB",help="Download RATDB tables to a directory.", action='store_true')
     parser.add_argument('-d', '--dir', dest="dataDir", help="Directory (including path) of ratdb files.", type=str, required=True)
     args = parser.parse_args()
     
@@ -83,11 +90,7 @@ if __name__=="__main__":
 
     print "Running dqhlChecksPlots for run range %i-%i" % (firstRun, lastRun)
 
-    # Check if user wants to save ratdb files
-    if (args.createRATDB):
-        createRATDBFiles(firstRun, lastRun, args.dataDir)
-
-    dqhlChecksPlots(firstRun, lastRun, args.dataDir)
+    dqhlChecksPlots(firstRun, lastRun, args.dataDir, args.downloadRATDB)
 
     sys.exit(0)
 
