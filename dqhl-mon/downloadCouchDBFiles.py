@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 # From Mark Stringer
 
@@ -6,8 +6,9 @@ import couchdb
 import json
 import os
 import DB_settings
+from dqhlProcChecks import isPhysicsRun
 
-def getCouchDBDict(server,runNumber):
+def getDQtable(server,runNumber):
     dqDB = server["data-quality"]
     data = None
     for row in dqDB.view('_design/data-quality/_view/runs'):
@@ -16,23 +17,33 @@ def getCouchDBDict(server,runNumber):
             data = dqDB.get(runDocId)
             return data
 
-def createRATDBFiles(db,imagedir):
-    folders = os.listdir(imagedir)
-    for fold in folders:
-        if not "TELLIE_DQ_IMAGES" in fold:
-            continue
-        runNum = int(fold.split("_")[-1])
-        couchDict = getCouchDBDict(db,runNum)
-        outFile = os.path.join(imagedir,fold)
-        outFile = os.path.join(outFile,"DATAQUALITY_RECORDS_%d_p1.ratdb" % runNum)
-        print "Creating File: %s" % outFile
-        with open(outFile,"w") as fil:
-            outString = json.dumps(couchDict,fil,indent=0)
-            fil.write(outString)
-
-
-if __name__=="__main__":
+def downloadRATDBtables(firstRun, lastRun, dataDir):
+    # Connect to couchdb
     db = couchdb.Server(DB_settings.COUCHDB_SERVER)
-    # createRATDBFiles(db,"/home/mark/Documents/PHD/DQTests/TELLIEDQTest/28March2017Runs")
-    createRATDBFiles(db,".")
+    if not os.path.isdir(dataDir):
+        try:
+            os.makedirs(dataDir)
+        except OSError:
+            print "Could not create directory %s, invalid path. Terminating code.\n" %s
 
+            
+    for runNum in range(firstRun, lastRun+1):
+        outFile = os.path.join(dataDir, "DATAQUALITY_RECORDS_%i.ratdb" % runNum)
+        # Donwload table if the user doesn't have it and is a physics run
+        if not os.path.isfile(outFile):
+            couchDict = getDQtable(db, runNum)
+            if (couchDict != None):
+                if isPhysicsRun(couchDict):
+                    print "Creating File: %s" %outFile
+                    with open(outFile,"w") as fil:
+                        outString = json.dumps(couchDict,fil,indent=1)
+                        fil.write(outString)
+                else:
+                    print "Run number %i is not a PHYSICS run" % runNum + \
+                        " (although DQHL record was found)"
+            else:
+                print "No DQHL table for run %i" %runNum
+        else:
+            print "File: %s already exists." %outFile
+
+    return
